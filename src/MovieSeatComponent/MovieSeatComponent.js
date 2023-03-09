@@ -5,6 +5,7 @@ export default class MovieSeatComponent extends Component {
   state = {
     seat: dataSeat,
     user: [],
+    cart: []
   };
 
   handleSelect = () => {
@@ -17,36 +18,49 @@ export default class MovieSeatComponent extends Component {
     this.setState({
       user: newUser,
     });
+
+    document.querySelectorAll('.ghe').forEach(item => item.disabled = false)
+  };
+
+  handleChooseSeat = (soGhe) => {
+    let cloneSeat = this.state.seat;
+    let cloneCart = this.state.cart
+    let index = cloneSeat.findIndex((x) => x.hang == soGhe.charAt(0));
+    if (!cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat) 
+    {
+      cloneCart.push(cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1])
+      document.getElementById(soGhe).classList.add("gheDangChon");
+      cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat = true;
+    } else {
+      document.getElementById(soGhe).classList.remove("gheDangChon");
+      cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat = false;
+      cloneCart.findIndex( (x) => x.soGhe == soGhe.slice(1) - 1)
+      cloneCart.splice(cloneCart.findIndex( (x) => x.daDat == false), 1);
+      console.log(cloneCart.findIndex( (x) => x.daDat == false));
+    }
+
+    this.setState({
+      seat: cloneSeat,
+      cart: cloneCart
+    });
   };
 
   handleConfirm = () => {
     console.log("confirm");
     console.log(this.state.user);
+
+    document.querySelector('#nameDisplay').innerHTML = this.state.user[0]
+
+    document.querySelector('#NumberDisplay').innerHTML = this.state.user[1]
+    
+    this.state.cart.forEach((item) => {
+      document.querySelector('#seatsDisplay').innerHTML += `${item.soGhe} `
+    })
+
+    document.querySelectorAll('.ghe').forEach(item => item.disabled = true)
   };
 
-  handleChooseSeat = (soGhe) => {
-    let count = 0;
-    let cloneSeat = this.state.seat;
-    let index = cloneSeat.findIndex((x) => x.hang == soGhe.charAt(0));
-    if (
-      !cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat &&
-      count < this.state.user[1]) 
-      {
-      document.getElementById(soGhe).classList.add("gheDuocChon");
-      cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat = true;
-      count = count + 1
-    } else {
-      document.getElementById(soGhe).classList.remove("gheDuocChon");
-      cloneSeat[index].danhSachGhe[soGhe.slice(1) - 1].daDat = false;
-      count = count - 1
-    }
-
-    console.log(count);
-
-    this.setState({
-      seat: cloneSeat,
-    });
-  };
+ 
 
   renderSeat = () => {
     return this.state.seat.map((item) => {
@@ -56,9 +70,10 @@ export default class MovieSeatComponent extends Component {
             return (
               <td>
                 <button
-                  className="ghe"
+                  className="ghe m-2"
                   id={seat.soGhe}
                   onClick={() => this.handleChooseSeat(seat.soGhe)}
+                
                 >
                   {seat.soGhe}
                 </button>
